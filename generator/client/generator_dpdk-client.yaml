@@ -1,0 +1,88 @@
+metadata:
+    name: odp_generator-dpdk-client
+    format: Lava-Test-Shell Test Definition 1.0
+    description: Run odp_generator as udp sender
+    environment:
+        - lava-test-shell
+
+params:
+    BUILD_DIR: /root
+    DPDK_DIR: dpdk
+    DPDK_TAG: v17.08
+    DPDK_REPO: http://dpdk.org/git/dpdk
+    DPDK_TARGET: x86_64-native-linuxapp-gcc
+    ODP_BRANCH: master
+    ODP_INSTALL_DIR: /root/install_dir
+    LINUX_HEADERS_PATH: http://people.linaro.org/~bogdan.pricope/kernel4.4
+    LINUX_HEADER_PKG: linux-headers-4.4.0-31_4.4.0-31.50_all.deb
+
+install:
+    deps:
+        - git
+        - build-essential
+        - automake
+        - autoconf
+        - libtool
+        - libcunit1-dev
+        - curl
+        - libssl-dev
+        - doxygen
+        - asciidoc
+        - asciidoctor
+        - mscgen
+        - libpcap-dev
+        - libnuma-dev
+        - pkg-config
+        - pciutils
+        - telnet
+        - wget
+        - gawk
+        - sed
+        - bash
+        - ethtool
+        - python-argparse
+        - autoconf-archive
+
+    steps:
+        - echo "Start install_steps"
+        - echo "Install linux headers"
+        - curl -s -O ${LINUX_HEADERS_PATH}/${LINUX_HEADER_PKG}
+        - dpkg -i ${LINUX_HEADER_PKG}
+        - cd $BUILD_DIR
+        - echo "Build DPDK"
+        - git -c advice.detachedHead=false clone -q --depth=1 --single-branch --branch=$DPDK_TAG $DPDK_REPO $BUILD_DIR/$DPDK_DIR
+        - cd $BUILD_DIR/$DPDK_DIR
+        - git log --oneline --decorate
+        - make config T=$DPDK_TARGET O=$DPDK_TARGET
+        - cd $BUILD_DIR/$DPDK_DIR/$DPDK_TARGET
+        - sed -ri 's,(CONFIG_RTE_LIBRTE_PMD_PCAP=).*,\1y,' .config
+        - cd $BUILD_DIR/$DPDK_DIR
+        - make install T=$DPDK_TARGET EXTRA_CFLAGS="-fPIC"
+        - cd $BUILD_DIR
+        - echo "Build ODP"
+        - git clone https://github.com/Linaro/odp
+        - cd odp
+        - git checkout -b test_perf origin/$ODP_BRANCH
+        - ./bootstrap || true
+        - autoreconf -i
+        - ./configure --prefix=$ODP_INSTALL_DIR --with-dpdk-path=$BUILD_DIR/$DPDK_DIR/$DPDK_TARGET --disable-test-cpp --disable-test-perf --disable-test-vald --disable-test-perf-proc --disable-test-example --disable-test-helper --enable-dpdk-zero-copy
+        - make clean
+        - make
+        - make install
+        - cd $BUILD_DIR
+        - echo "End install_steps"
+
+run:
+    steps:
+        - export BUILD_DIR=${BUILD_DIR:-/root}
+        - export DPDK_INSTALL_DIR=${DPDK_INSTALL_DIR:-${BUILD_DIR}/${DPDK_DIR}/${DPDK_TARGET}}
+        - export ODP_INSTALL_DIR=${ODP_INSTALL_DIR:-/root/install_dir}
+        - export RUN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+        - export VLAND_NAME=${VLAND_NAME:-vlan_one}
+        - export LOCAL_IP=${LOCAL_IP:-"192.168.100.2"}
+        - export LOCAL_PORT=${LOCAL_PORT:-5000}
+        - export REMOTE_IP=${REMOTE_IP:-"192.168.100.1"}
+        - export REMOTE_PORT=${REMOTE_PORT:-5001}
+        - export CORES_MASK=${CORES_MASK:-"0x8"}
+        - export PACKET_CNT=${PACKET_CNT:-600000000}
+        - lava-test-case generator-client --shell generator/client/generator-dpdk-client.sh
