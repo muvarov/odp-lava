@@ -112,3 +112,4 @@ actions:
               "REMOTE_PORT": 5001
               "CORES_MASK": "0x8"
               "PACKET_CNT": 800000000
+              "PKTIO" : "socket"

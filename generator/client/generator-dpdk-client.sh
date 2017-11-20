@@ -41,6 +41,7 @@ echo "REMOTE_PORT = ${REMOTE_PORT}"
 echo "CORES_MASK = ${CORES_MASK}"
 
 echo "PACKET_CNT= ${PACKET_CNT}"
+echo "PKTIO= ${PKTIO}"
 
 function what_vland_entry {
         lava-vland-names | grep "^$1" | cut -d , -f 2
@@ -85,9 +86,12 @@ echo "DEV_PCI = ${DEV_PCI}"
 LOCAL_MAC=$(what_vland_MAC ${VLAND_NAME})
 echo "LOCAL_MAC = ${LOCAL_MAC}"
 
-${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -u ${DEV_PCI}
-${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --bind=igb_uio ${DEV_PCI}
-${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -s
+if [ "${PKTIO}" = "dpdk" ]; then
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -u ${DEV_PCI}
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --bind=igb_uio ${DEV_PCI}
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -s
+	dev="0"
+fi
 
 echo ">> SEND client_ready"
 lava-send client_ready
@@ -96,11 +100,21 @@ echo "<< Wait server_ready"
 lava-wait server_ready
 REMOTE_MAC=$(cat /tmp/lava_multi_node_cache.txt | cut -d = -f 2)
 echo "REMOTE_MAC = ${REMOTE_MAC}"
+if [ "${REMOTE_MAC}" = "" ]; then
+	cat /tmp/lava_multi_node_cache.txt
+	ifconfig -a
+	REMOTE_MAC="11:22:33:44:55:66"
+	echo "Using fake REMOTE_MAC = ${REMOTE_MAC}"
+fi
 
 sleep 2
 echo "Test start..."
 
-taskset 0xff ${ODP_INSTALL_DIR}/bin/odp_generator -I 0 --srcmac ${LOCAL_MAC} --dstmac ${REMOTE_MAC} \
+echo taskset 0xff ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev --srcmac ${LOCAL_MAC} --dstmac ${REMOTE_MAC} \
+                --srcip ${LOCAL_IP} --dstip ${REMOTE_IP} -m u -i 0 -c ${CORES_MASK} -p 18 \
+                -e ${LOCAL_PORT} -f ${REMOTE_PORT} -n ${PACKET_CNT}
+
+taskset 0xff ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev --srcmac ${LOCAL_MAC} --dstmac ${REMOTE_MAC} \
                 --srcip ${LOCAL_IP} --dstip ${REMOTE_IP} -m u -i 0 -c ${CORES_MASK} -p 18 \
                 -e ${LOCAL_PORT} -f ${REMOTE_PORT} -n ${PACKET_CNT} > /tmp/generator_client.data
 

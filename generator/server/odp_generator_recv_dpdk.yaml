@@ -84,4 +84,5 @@ run:
         - export RUN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
         - export VLAND_NAME=${VLAND_NAME:-vlan_one}
         - export CORES_MASK=${CORES_MASK:-0x4}
+        - export PKTIO=${PKTIO}
         - lava-test-case odp_generator_recv-dpdk-server --shell generator/server/odp_generator_recv_dpdk.sh

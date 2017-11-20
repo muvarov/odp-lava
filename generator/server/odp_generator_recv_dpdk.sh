@@ -48,36 +48,41 @@ if ! which lava-wait &>/dev/null; then
 	exit
 fi
 
-# Setup DPDK
 sysctl -w vm.nr_hugepages=1024
 sh -c 'echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages' || true
 mkdir ${RUN_DIR}/huge || true
 mount -t hugetlbfs nodev ${RUN_DIR}/huge || true
 
-depmod
-modprobe uio
-insmod ${DPDK_INSTALL_DIR}/kmod/igb_uio.ko || true
-
-# Setup DPDK interface
 dev=$(what_vland_interface ${VLAND_NAME})
 echo "dev = ${dev}"
 
-DEV_PCI=`${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --status | grep $dev | awk '{print $1}'`
-echo "DEV_PCI = ${DEV_PCI}"
 
-LOCAL_MAC=$(what_vland_MAC ${VLAND_NAME})
-echo "LOCAL_MAC = ${LOCAL_MAC}"
+if [ "${PKTIO}" = "dpdk" ]; then
+	# Setup DPDK
+	depmod
+	modprobe uio
+	insmod ${DPDK_INSTALL_DIR}/kmod/igb_uio.ko || true
 
-${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -u ${DEV_PCI}
-${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --bind=igb_uio ${DEV_PCI}
-${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -s
+	# Setup DPDK interface
+	DEV_PCI=`${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --status | grep $dev | awk '{print $1}'`
+	echo "DEV_PCI = ${DEV_PCI}"
+
+	LOCAL_MAC=$(what_vland_MAC ${VLAND_NAME})
+	echo "LOCAL_MAC = ${LOCAL_MAC}"
+
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -u ${DEV_PCI}
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --bind=igb_uio ${DEV_PCI}
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -s
+	#dpdk just uses index
+	dev="0"
+fi
 
 echo "<< WAIT client_ready"
 lava-wait client_ready
 
 echo "Test start..."
 cd ${RUN_DIR}
-taskset 0xff ${ODP_INSTALL_DIR}/bin/odp_generator -I 0 -m r -c ${CORES_MASK} > /tmp/app.data &
+taskset 0xff ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev -m r -c ${CORES_MASK} > /tmp/app.data &
 echo $! > /tmp/app.pid
 
 echo ">> SEND server_ready"
