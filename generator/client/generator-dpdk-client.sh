@@ -91,6 +91,8 @@ if [ "${PKTIO}" = "dpdk" ]; then
 	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --bind=igb_uio ${DEV_PCI}
 	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -s
 	dev="0"
+elif [ "${PKTIO}" = "socket" ]; then
+	ifconfig $dev up
 fi
 
 echo ">> SEND client_ready"
