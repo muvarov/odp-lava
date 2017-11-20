@@ -85,7 +85,7 @@ actions:
         - repository: https://github.com/muvarov/odp-lava.git
           from: git
           path: generator/server/odp_generator_recv_dpdk.yaml
-          name: server_odp_generator_send_recv_x86_dpdk
+          name: server_odp_server
           revision: master
           parameters:
               "ODP_BRANCH1": "master"
@@ -101,7 +101,7 @@ actions:
         - repository: https://github.com/muvarov/odp-lava.git
           from: git
           path: generator/client/generator_dpdk-client.yaml
-          name: client_odp_generator_send_recv_x86_dpdk
+          name: client_odp_client
           revision: master
           parameters:
               "ODP_BRANCH1": "master"

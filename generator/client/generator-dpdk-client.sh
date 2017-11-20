@@ -101,7 +101,7 @@ lava-wait server_ready
 REMOTE_MAC=$(cat /tmp/lava_multi_node_cache.txt | cut -d = -f 2)
 echo "REMOTE_MAC = ${REMOTE_MAC}"
 if [ "${REMOTE_MAC}" = "" ]; then
-	cat /tmp/lava_multi_node_cache.txt
+	cat /tmp/lava_multi_node_cache.txt || true
 	ifconfig -a
 	REMOTE_MAC="11:22:33:44:55:66"
 	echo "Using fake REMOTE_MAC = ${REMOTE_MAC}"
