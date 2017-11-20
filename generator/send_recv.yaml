@@ -91,6 +91,7 @@ actions:
               "ODP_BRANCH1": "master"
               "VLAND_NAME": "vlan_one"
               "CORES_MASK": "0x4"
+              "PKTIO" : "socket"
 
 - test:
     role:
