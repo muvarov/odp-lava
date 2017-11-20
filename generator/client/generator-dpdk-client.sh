@@ -93,6 +93,7 @@ if [ "${PKTIO}" = "dpdk" ]; then
 	dev="0"
 elif [ "${PKTIO}" = "socket" ]; then
 	ifconfig $dev up
+	export ODP_PKTIO_DISABLE_DPDK=1
 fi
 
 echo ">> SEND client_ready"

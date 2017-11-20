@@ -75,6 +75,9 @@ if [ "${PKTIO}" = "dpdk" ]; then
 	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -s
 	#dpdk just uses index
 	dev="0"
+elif [ "${PKTIO}" = "socket" ]; then
+	ifconfig $dev up
+	export ODP_PKTIO_DISABLE_DPDK=1
 fi
 
 echo "<< WAIT client_ready"
