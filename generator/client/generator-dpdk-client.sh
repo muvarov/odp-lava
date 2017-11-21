@@ -1,5 +1,5 @@
-#!/bin/bash
-set -o errexit
+#!/bin/bash -x
+# set -o errexit
 
 # Install dir
 BUILD_DIR=${BUILD_DIR:-/root}

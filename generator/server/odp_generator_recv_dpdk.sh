@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 set -o errexit
 
 # Install dir
@@ -78,6 +78,9 @@ if [ "${PKTIO}" = "dpdk" ]; then
 elif [ "${PKTIO}" = "socket" ]; then
 	ifconfig $dev up
 	export ODP_PKTIO_DISABLE_DPDK=1
+else
+	echo "UNKNOWN PKTIO ${PKTIO}"
+	ifconfig $dev up
 fi
 
 echo "<< WAIT client_ready"
