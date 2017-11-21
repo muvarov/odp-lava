@@ -1,5 +1,5 @@
 #!/bin/bash -x
-set -o errexit
+# set -o errexit
 
 # Install dir
 BUILD_DIR=${BUILD_DIR:-/root}
@@ -88,7 +88,7 @@ lava-wait client_ready
 
 echo "Test start..."
 cd ${RUN_DIR}
-taskset 0xff ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev -m r -c ${CORES_MASK} > /tmp/app.data &
+taskset 0xff ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev -m r -c ${CORES_MASK} |tee /tmp/app.data &
 echo $! > /tmp/app.pid
 
 echo ">> SEND server_ready"
