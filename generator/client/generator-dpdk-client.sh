@@ -92,11 +92,11 @@ if [ "${PKTIO}" = "dpdk" ]; then
 	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -s
 	dev="0"
 elif [ "${PKTIO}" = "socket" ]; then
-	ifconfig $dev $LOCAL_IP up
+	ifconfig ${dev} ${LOCAL_IP} up
 	export ODP_PKTIO_DISABLE_DPDK=1
 else
 	echo "UNKNOWN PKTIO ${PKTIO}"
-	ifconfig $dev up
+	ifconfig ${dev} up
 fi
 
 echo ">> SEND client_ready"
@@ -105,7 +105,7 @@ lava-send client_ready
 echo "<< Wait server_ready"
 lava-wait server_ready
 
-ping -c 30 $REMOTE_IP
+ping -c 30 ${REMOTE_IP}
 
 REMOTE_MAC=$(cat /tmp/lava_multi_node_cache.txt | cut -d = -f 2)
 echo "REMOTE_MAC = ${REMOTE_MAC}"
