@@ -2,11 +2,11 @@ job_name: odp_generator_send_recv_x86_dpdk
 
 timeouts:
     job:
-        minutes: 30
+        minutes: 60
     action:
-        minutes: 30
+        minutes: 60
     connection:
-        minutes: 30
+        minutes: 60
 
 visibility: public
 priority: medium
@@ -25,7 +25,7 @@ protocols:
         context:
           extra_kernel_args: default_hugepagesz=2M hugepagesz=1G hugepages=1 hugepagesz=2M hugepages=1024
     timeout:
-      minutes: 30
+      minutes: 60
   lava-vland:
     client:
       vlan_one:
@@ -80,7 +80,7 @@ actions:
     role:
       - server
     timeout:
-        minutes: 30
+        minutes: 60
     definitions:
         - repository: https://github.com/muvarov/odp-lava.git
           from: git
@@ -97,7 +97,7 @@ actions:
     role:
         -client
     timeout:
-        minutes: 30
+        minutes: 60
     definitions:
         - repository: https://github.com/muvarov/odp-lava.git
           from: git
