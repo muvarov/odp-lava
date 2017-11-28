@@ -76,7 +76,7 @@ if [ "${PKTIO}" = "dpdk" ]; then
 	#dpdk just uses index
 	dev="0"
 elif [ "${PKTIO}" = "socket" ]; then
-	ifconfig $dev up
+	ifconfig $dev $LOCAL_IP up
 	export ODP_PKTIO_DISABLE_DPDK=1
 else
 	echo "UNKNOWN PKTIO ${PKTIO}"
@@ -85,6 +85,9 @@ fi
 
 echo "<< WAIT client_ready"
 lava-wait client_ready
+
+ping -c 30 $REMOTE_IP
+
 
 echo "Test start..."
 cd ${RUN_DIR}
