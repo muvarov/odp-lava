@@ -122,6 +122,8 @@ echo "Test start..."
 echo taskset 0xff ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev --srcmac ${LOCAL_MAC} --dstmac ${REMOTE_MAC} \
                 --srcip ${LOCAL_IP} --dstip ${REMOTE_IP} -m u -i 0 -c ${CORES_MASK} -p 18 \
                 -e ${LOCAL_PORT} -f ${REMOTE_PORT} -n ${PACKET_CNT}
+echo "<< Wait server_start_generator"
+lava-wait server_start_generator
 
 taskset 0xff ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev --srcmac ${LOCAL_MAC} --dstmac ${REMOTE_MAC} \
                 --srcip ${LOCAL_IP} --dstip ${REMOTE_IP} -m u -i 0 -c ${CORES_MASK} -p 18 \
@@ -130,6 +132,8 @@ taskset 0xff ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev --srcmac ${LOCAL_MAC} 
 echo "TX:"
 sync || true
 cat /tmp/generator_client.data
+
+ifconfig -a
 
 MAX_SEND_RATE=`cat /tmp/generator_client.data | grep "max send rate:" | tail -n 1 | awk '{print $12}'`
 echo "MAX_SEND_RATE = ${MAX_SEND_RATE}"

@@ -56,6 +56,8 @@ mount -t hugetlbfs nodev ${RUN_DIR}/huge || true
 dev=$(what_vland_interface ${VLAND_NAME})
 echo "dev = ${dev}"
 
+LOCAL_MAC=$(what_vland_MAC ${VLAND_NAME})
+echo "LOCAL_MAC = ${LOCAL_MAC}"
 
 if [ "${PKTIO}" = "dpdk" ]; then
 	# Setup DPDK
@@ -67,13 +69,7 @@ if [ "${PKTIO}" = "dpdk" ]; then
 	DEV_PCI=`${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --status | grep $dev | awk '{print $1}'`
 	echo "DEV_PCI = ${DEV_PCI}"
 
-	LOCAL_MAC=$(what_vland_MAC ${VLAND_NAME})
-	echo "LOCAL_MAC = ${LOCAL_MAC}"
-
 	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -u ${DEV_PCI}
-	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --bind=igb_uio ${DEV_PCI}
-	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -s
-	#dpdk just uses index
 	dev="0"
 elif [ "${PKTIO}" = "socket" ]; then
 	ifconfig ${dev} 1.1.1.1 up
@@ -91,6 +87,11 @@ ping -c 30 1.1.1.2
 
 echo "Test start..."
 cd ${RUN_DIR}
+
+echo ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev -m r -c ${CORES_MASK}
+echo ">> SEND server_start_generator"
+lava-send  server_start_generator
+
 taskset 0xff ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev -m r -c ${CORES_MASK} |tee /tmp/app.data &
 echo $! > /tmp/app.pid
 
@@ -108,6 +109,8 @@ cat /tmp/app.data
 RESULT=`cat /tmp/app.data | tail -n 1  | grep "sent:"`
 RESULT_RATE=`echo $RESULT | awk '{print $23}'`
 RESULT_UNIT=`echo $RESULT | awk '{print $24}'`
+
+ifconfig -a
 
 lava-test-case RX_rate --result pass --measurement $RESULT_RATE --units $RESULT_UNIT
 
