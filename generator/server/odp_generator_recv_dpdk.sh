@@ -104,8 +104,6 @@ lava-wait client_done
 sync || true
 kill -9 `cat /tmp/app.pid`
 
-cat /tmp/app.data
-
 RESULT=`cat /tmp/app.data | tail -n 1  | grep "sent:"`
 RESULT_RATE=`echo $RESULT | awk '{print $23}'`
 RESULT_UNIT=`echo $RESULT | awk '{print $24}'`

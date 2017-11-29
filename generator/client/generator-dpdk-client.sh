@@ -116,9 +116,7 @@ if [ "${REMOTE_MAC}" = "" ]; then
 	echo "Using fake REMOTE_MAC = ${REMOTE_MAC}"
 fi
 
-sleep 2
 echo "Test start..."
-
 echo taskset 0xff ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev --srcmac ${LOCAL_MAC} --dstmac ${REMOTE_MAC} \
                 --srcip ${LOCAL_IP} --dstip ${REMOTE_IP} -m u -i 0 -c ${CORES_MASK} -p 18 \
                 -e ${LOCAL_PORT} -f ${REMOTE_PORT} -n ${PACKET_CNT}
@@ -127,11 +125,7 @@ lava-wait server_start_generator
 
 taskset 0xff ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev --srcmac ${LOCAL_MAC} --dstmac ${REMOTE_MAC} \
                 --srcip ${LOCAL_IP} --dstip ${REMOTE_IP} -m u -i 0 -c ${CORES_MASK} -p 18 \
-                -e ${LOCAL_PORT} -f ${REMOTE_PORT} -n ${PACKET_CNT} > /tmp/generator_client.data
-
-echo "TX:"
-sync || true
-cat /tmp/generator_client.data
+                -e ${LOCAL_PORT} -f ${REMOTE_PORT} -n ${PACKET_CNT} |tee  /tmp/generator_client.data
 
 ifconfig -a
 
