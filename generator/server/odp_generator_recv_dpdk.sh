@@ -82,6 +82,8 @@ fi
 
 echo "<< WAIT client_ready"
 lava-wait client_ready
+echo ">> SEND server_ready"
+lava-send server_ready peer_mac=${LOCAL_MAC}
 
 ping -c 30 1.1.1.2
 
@@ -90,13 +92,12 @@ cd ${RUN_DIR}
 
 echo ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev -m r -c ${CORES_MASK}
 echo ">> SEND server_start_generator"
+
+lava-wait  client_start_generator
 lava-send  server_start_generator
 
 taskset 0xff ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev -m r -c ${CORES_MASK} |tee /tmp/app.data &
 echo $! > /tmp/app.pid
-
-echo ">> SEND server_ready"
-lava-send server_ready peer_mac=${LOCAL_MAC}
 
 echo "<< WAIT client_done"
 lava-wait client_done
