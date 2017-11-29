@@ -80,7 +80,7 @@ actions:
     role:
       - server
     timeout:
-        minutes: 60
+        minutes: 120
     definitions:
         - repository: https://github.com/muvarov/odp-lava.git
           from: git
@@ -97,7 +97,7 @@ actions:
     role:
         -client
     timeout:
-        minutes: 60
+        minutes: 120
     definitions:
         - repository: https://github.com/muvarov/odp-lava.git
           from: git
