@@ -59,33 +59,38 @@ echo "dev = ${dev}"
 LOCAL_MAC=$(what_vland_MAC ${VLAND_NAME})
 echo "LOCAL_MAC = ${LOCAL_MAC}"
 
-if [ "${PKTIO}" = "dpdk" ]; then
-	# Setup DPDK
-	depmod
-	modprobe uio
-	insmod ${DPDK_INSTALL_DIR}/kmod/igb_uio.ko || true
-
-	# Setup DPDK interface
-	DEV_PCI=`${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --status | grep $dev | awk '{print $1}'`
-	echo "DEV_PCI = ${DEV_PCI}"
-
-	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -u ${DEV_PCI}
-	dev="0"
-elif [ "${PKTIO}" = "socket" ]; then
-	ifconfig ${dev} 1.1.1.1 up
-	export ODP_PKTIO_DISABLE_DPDK=1
-	ifconfig -a
-else
-	echo "UNKNOWN PKTIO ${PKTIO}"
-	ifconfig $dev up
-fi
-
 echo "<< WAIT client_ready"
 lava-wait client_ready
 echo ">> SEND server_ready"
 lava-send server_ready peer_mac=${LOCAL_MAC}
 
+ifconfig ${dev} 1.1.1.1 up
 ping -c 30 1.1.1.2
+ifconfig -a
+
+if [ "${PKTIO}" = "dpdk" ]; then
+	# Setup DPDK
+	depmod
+	lsmod
+	modprobe uio
+	insmod ${DPDK_INSTALL_DIR}/kmod/igb_uio.ko || true
+
+	ifconfig ${dev} down
+	# Setup DPDK interface
+	DEV_PCI=`${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --status | grep $dev | awk '{print $1}'`
+	echo "DEV_PCI = ${DEV_PCI}"
+
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -u ${DEV_PCI}
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --bind=igb_uio ${DEV_PCI}
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -s
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --status
+	dev="0"
+elif [ "${PKTIO}" = "socket" ]; then
+	export ODP_PKTIO_DISABLE_DPDK=1
+else
+	echo "UNKNOWN PKTIO ${PKTIO}"
+	ifconfig $dev up
+fi
 
 echo "Test start..."
 cd ${RUN_DIR}

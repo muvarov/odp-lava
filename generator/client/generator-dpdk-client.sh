@@ -80,32 +80,44 @@ insmod ${DPDK_INSTALL_DIR}/kmod/igb_uio.ko || true
 dev=$(what_vland_interface ${VLAND_NAME})
 echo "dev = ${dev}"
 
-DEV_PCI=`${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --status | grep $dev | awk '{print $1}'`
-echo "DEV_PCI = ${DEV_PCI}"
+# DEV_PCI=`${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --status | grep $dev | awk '{print $1}'`
+# echo "DEV_PCI = ${DEV_PCI}"
 
 LOCAL_MAC=$(what_vland_MAC ${VLAND_NAME})
 echo "LOCAL_MAC = ${LOCAL_MAC}"
 
+
+echo ">> SEND client_ready"
+lava-send client_ready
+echo "<< Wait server_ready"
+lava-wait server_ready
+
+ifconfig ${dev} 1.1.1.2 up
+ping -c 30 1.1.1.1
+ifconfig -a
+
 if [ "${PKTIO}" = "dpdk" ]; then
+	depmod
+	lsmod
+	modprobe uio
+	insmod ${DPDK_INSTALL_DIR}/kmod/igb_uio.ko || true
+
+	ifconfig ${dev} down
+	# Setup DPDK interface
+	DEV_PCI=`${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --status | grep $dev | awk '{print $1}'`
+	echo "DEV_PCI = ${DEV_PCI}"
+
 	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -u ${DEV_PCI}
 	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --bind=igb_uio ${DEV_PCI}
 	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -s
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --status
 	dev="0"
 elif [ "${PKTIO}" = "socket" ]; then
-	ifconfig ${dev} 1.1.1.2 up
 	export ODP_PKTIO_DISABLE_DPDK=1
 else
 	echo "UNKNOWN PKTIO ${PKTIO}"
 	ifconfig ${dev} up
 fi
-
-echo ">> SEND client_ready"
-lava-send client_ready
-
-echo "<< Wait server_ready"
-lava-wait server_ready
-
-ping -c 30 1.1.1.1
 
 REMOTE_MAC=$(cat /tmp/lava_multi_node_cache.txt | cut -d = -f 2)
 echo "REMOTE_MAC = ${REMOTE_MAC}"
