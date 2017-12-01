@@ -88,7 +88,7 @@ actions:
           name: server_odp_server
           revision: master
           parameters:
-              "ODP_BRANCH1": "master"
+              "ODP_BRANCH": "api-next"
               "VLAND_NAME": "vlan_one"
               "CORES_MASK": "0x4"
               "PKTIO" : "dpdk"
@@ -105,7 +105,7 @@ actions:
           name: client_odp_client
           revision: master
           parameters:
-              "ODP_BRANCH1": "master"
+              "ODP_BRANCH": "api-next"
               "VLAND_NAME": "vlan_one"
               "LOCAL_IP": "192.168.100.2"
               "LOCAL_PORT": 5000
