@@ -91,7 +91,7 @@ actions:
               "ODP_BRANCH": "api-next"
               "VLAND_NAME": "vlan_one"
               "CORES_MASK": "0x4"
-              "PKTIO" : "dpdk"
+              "PKTIO" : "socket"
 
 - test:
     role:
