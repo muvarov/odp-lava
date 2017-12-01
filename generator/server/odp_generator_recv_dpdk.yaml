@@ -62,10 +62,11 @@ install:
         - make install T=$DPDK_TARGET EXTRA_CFLAGS="-fPIC"
         - cd $BUILD_DIR
         - echo "Build ODP"
-        - git clone --depth=1 --single-branch https://github.com/Linaro/odp
-        - cd odp
         - echo "Requested branch  = ${ODP_BRANCH}"
-        - git checkout -b test_perf origin/${ODP_BRANCH}
+        - git clone --depth=1 --single-branch https://github.com/Linaro/odp -b ${ODP_BRANCH}
+        - cd odp
+        - git branch
+        - git log -1
         - ./bootstrap || true
         - autoreconf -i
         - ./configure --prefix=$ODP_INSTALL_DIR --with-dpdk-path=$BUILD_DIR/$DPDK_DIR/$DPDK_TARGET --disable-test-cpp --disable-test-perf --disable-test-vald --disable-test-perf-proc --disable-test-example --disable-test-helper --enable-dpdk-zero-copy
