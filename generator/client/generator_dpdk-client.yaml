@@ -41,6 +41,9 @@ install:
         - ethtool
         - python-argparse
         - autoconf-archive
+        - libconfig-dev
+        - libnuma-dev
+        - libpcap-dev
 
     steps:
         - echo "Start install_steps"

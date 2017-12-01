@@ -44,6 +44,9 @@ install:
         - wget
         - gawk
         - sed
+        - libconfig-dev
+        - libnuma-dev
+        - libpcap-dev
 
     steps:
         - echo "Start install_steps"
