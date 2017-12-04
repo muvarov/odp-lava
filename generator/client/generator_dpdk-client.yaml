@@ -59,7 +59,7 @@ install:
         - cd $BUILD_DIR/$DPDK_DIR/$DPDK_TARGET
         - sed -ri 's,(CONFIG_RTE_LIBRTE_PMD_PCAP=).*,\1y,' .config
         - cd $BUILD_DIR/$DPDK_DIR
-        - make install T=$DPDK_TARGET EXTRA_CFLAGS="-fPIC"
+        - make install T=$DPDK_TARGET EXTRA_CFLAGS="-fPIC" -j $(nproc)
         - cd $BUILD_DIR
         - echo "Build ODP"
         - echo "Requested branch  = ${ODP_REPO} branch ${ODP_BRANCH}"
@@ -71,7 +71,7 @@ install:
         - autoreconf -i
         - ./configure --prefix=$ODP_INSTALL_DIR --with-dpdk-path=$BUILD_DIR/$DPDK_DIR/$DPDK_TARGET --disable-test-cpp --disable-test-perf --disable-test-vald --disable-test-perf-proc --disable-test-example --disable-test-helper --enable-dpdk-zero-copy
         - make clean
-        - make
+        - make -j $(nproc)
         - make install
         - cd $BUILD_DIR
         - echo "End install_steps"
