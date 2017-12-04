@@ -84,7 +84,7 @@ if [ "${PKTIO}" = "dpdk" ]; then
 	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --bind=igb_uio ${DEV_PCI}
 	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -s
 	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --status
-	dev="1"
+	dev="0"
 elif [ "${PKTIO}" = "socket" ]; then
 	export ODP_PKTIO_DISABLE_DPDK=1
 else
