@@ -107,7 +107,7 @@ actions:
           revision: master
           parameters:
               "ODP_REPO": "https://github.com/muvarov/odp"
-              "ODP_BRANCH": "api-next"
+              "ODP_BRANCH": "devel/api-next_shsum"
               "VLAND_NAME": "vlan_one"
               "LOCAL_IP": "192.168.100.2"
               "LOCAL_PORT": 5000
