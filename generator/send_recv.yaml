@@ -113,6 +113,6 @@ actions:
               "LOCAL_PORT": 5000
               "REMOTE_IP": "192.168.100.1"
               "REMOTE_PORT": 5001
-              "CORES_MASK": "0x8"
+              "CORES_MASK": "0x4"
               "PACKET_CNT": 8000000000
               "PKTIO" : "dpdk"
