@@ -50,6 +50,9 @@ install:
 
     steps:
         - echo "Start install_steps"
+        - mkdir -p /mnt/huge
+        - mount -t hugetlbfs nodev /mnt/huge
+        - mount
         - echo "Install linux headers"
         - curl -s -O ${LINUX_HEADERS_PATH}/${LINUX_HEADER_PKG}
         - dpkg -i ${LINUX_HEADER_PKG}
