@@ -62,8 +62,8 @@ install:
         - make install T=$DPDK_TARGET EXTRA_CFLAGS="-fPIC"
         - cd $BUILD_DIR
         - echo "Build ODP"
-        - echo "Requested branch  = ${ODP_BRANCH}"
-        - git clone --depth=1 --single-branch https://github.com/Linaro/odp -b ${ODP_BRANCH}
+        - echo "Requested branch  = ${ODP_REPO} branch ${ODP_BRANCH}"
+        - git clone --depth=1 --single-branch ${ODP_REPO} -b ${ODP_BRANCH}
         - cd odp
         - git branch
         - git log -1
