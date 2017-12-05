@@ -66,6 +66,7 @@ install:
         - cd $BUILD_DIR
         - echo "Build ODP"
         - echo "Requested branch  = ${ODP_REPO} branch ${ODP_BRANCH}"
+        - rm -rf odp
         - git clone --depth=1 --single-branch ${ODP_REPO} -b ${ODP_BRANCH}
         - cd odp
         - git branch
