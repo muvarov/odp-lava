@@ -137,7 +137,7 @@ echo "<< Wait server_start_generator"
 lava-send  client_start_generator
 lava-wait  server_start_generator
 
-GEN_UDP_TX_BURST_SIZE=32
+GEN_UDP_TX_BURST_SIZE=4096
 
 export ODP_PKTIO_DPDK_PARAMS="-m 1024"
 taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev --srcmac ${LOCAL_MAC} --dstmac ${REMOTE_MAC} \

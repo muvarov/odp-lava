@@ -101,8 +101,8 @@ echo ">> SEND server_start_generator"
 lava-wait  client_start_generator
 lava-send  server_start_generator
 
-export ODP_PKTIO_DPDK_PARAMS="-m 1024"
-taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev -m r -c ${CORES_MASK} |tee /tmp/app.data &
+GEN_UDP_TX_BURST_SIZE=4096
+taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev -m r -c ${CORES_MASK} -x {GEN_UDP_TX_BURST_SIZE}|tee /tmp/app.data &
 #taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_l2fwd -i $dev |tee /tmp/app.data &
 echo $! > /tmp/app.pid
 
