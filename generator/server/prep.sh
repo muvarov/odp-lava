@@ -37,14 +37,53 @@ function what_vland_MAC {
         lava-vland-self | grep "$(what_vland_entry $1)" | cut -d , -f 2
 }
 
+# what_vland_interface
+# returns ethX assigned to VLAND_NAME
+function what_vland_interface {
+	ls $(what_vland_sys_path $1)
+}
+
+if ! which lava-wait &>/dev/null; then
+	echo "This script must be executed in LAVA"
+	exit
+fi
+
+sysctl -w vm.nr_hugepages=1024
+sh -c 'echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages' || true
+mkdir ${RUN_DIR}/huge || true
+mount -t hugetlbfs nodev ${RUN_DIR}/huge || true
+
 dev=$(what_vland_interface ${VLAND_NAME})
 echo "dev = ${dev}"
 
 LOCAL_MAC=$(what_vland_MAC ${VLAND_NAME})
 echo "LOCAL_MAC = ${LOCAL_MAC}"
 
+echo "<< WAIT client_ready"
+lava-wait client_ready
+echo ">> SEND server_ready"
+lava-send server_ready peer_mac=${LOCAL_MAC}
+
+ifconfig ${dev} 1.1.1.1 up
+ping -c 30 1.1.1.2
+ifconfig -a
 
 if [ "${PKTIO}" = "dpdk" ]; then
+	# Setup DPDK
+	depmod
+	lsmod
+	modprobe uio
+	insmod ${DPDK_INSTALL_DIR}/kmod/igb_uio.ko || true
+
+	ifconfig ${dev} down
+	# Setup DPDK interface
+	DEV_PCI=`${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --status | grep $dev | awk '{print $1}'`
+	echo "DEV_PCI = ${DEV_PCI}"
+
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -u ${DEV_PCI}
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --bind=igb_uio ${DEV_PCI}
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -s
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --status
 	dev="0"
 elif [ "${PKTIO}" = "socket" ]; then
 	export ODP_PKTIO_DISABLE_DPDK=1
@@ -59,21 +98,5 @@ cd ${RUN_DIR}
 echo ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev -m r -c ${CORES_MASK}
 echo ">> SEND server_start_generator"
 
-GEN_UDP_TX_BURST_SIZE=4096
-taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev -m r -c ${CORES_MASK} -x {GEN_UDP_TX_BURST_SIZE}|tee /tmp/app.data &
-#taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_l2fwd -i $dev |tee /tmp/app.data &
-echo $! > /tmp/app.pid
-
-echo "<< WAIT client_done"
-lava-wait client_done
-
-sync || true
-kill -9 `cat /tmp/app.pid`
-
-RESULT=`cat /tmp/app.data | tail -n 1  | grep "sent:"`
-RESULT_RATE=`echo $RESULT | awk '{print $23}'`
-RESULT_UNIT=`echo $RESULT | awk '{print $24}'`
-
-ifconfig -a
-
-lava-test-case RX_rate --result pass --measurement $RESULT_RATE --units $RESULT_UNIT
+lava-wait  client_start_generator
+lava-send  server_start_generator

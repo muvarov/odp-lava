@@ -92,4 +92,6 @@ run:
         - export VLAND_NAME=${VLAND_NAME:-vlan_one}
         - export CORES_MASK=${CORES_MASK:-0x4}
         - export PKTIO=${PKTIO}
+        - generator/server/prep.sh
         - lava-test-case odp_generator_recv-dpdk-server --shell generator/server/odp_generator_recv_dpdk.sh
+        - generator/server/done.sh
