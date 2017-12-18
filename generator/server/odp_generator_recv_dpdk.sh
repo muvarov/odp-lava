@@ -74,6 +74,14 @@ RESULT=`cat /tmp/app.data | tail -n 1  | grep "sent:"`
 RESULT_RATE=`echo $RESULT | awk '{print $23}'`
 RESULT_UNIT=`echo $RESULT | awk '{print $24}'`
 
+
+git clone https://github.com/muvarov/odp_perf_reports.git
+python odp_perf_reports/odpt_add_result.py generator RX $RESULT_RATE
+GIT_COMMIT=`git log -1 --format="%H"`
+python odp_perf_reports/odpt_post_results.py \
+	http://localhost:5000/githubemail/testresults.py \
+	$GIT_COMMIT Maxim
+
 ifconfig -a
 
 lava-test-case RX_rate --result pass --measurement $RESULT_RATE --units $RESULT_UNIT
