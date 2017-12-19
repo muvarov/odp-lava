@@ -88,8 +88,8 @@ actions:
           name: server_odp_server
           revision: master
           parameters:
-              "ODP_REPO": "https://github.com/muvarov/odp"
-              "ODP_BRANCH": "devel/api-next_shsum"
+              "ODP_REPO": "https://github.com/Linaro/odp"
+              "ODP_BRANCH": "master"
               "VLAND_NAME": "vlan_one"
               "CORES_MASK": "0x4"
               "PKTIO" : "dpdk"
@@ -106,8 +106,8 @@ actions:
           name: client_odp_client
           revision: master
           parameters:
-              "ODP_REPO": "https://github.com/muvarov/odp"
-              "ODP_BRANCH": "devel/api-next_shsum"
+              "ODP_REPO": "https://github.com/Linaro/odp"
+              "ODP_BRANCH": "master"
               "VLAND_NAME": "vlan_one"
               "LOCAL_IP": "192.168.100.2"
               "LOCAL_PORT": 5000
