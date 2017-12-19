@@ -61,11 +61,56 @@ function what_vland_interface {
 	        ls $(what_vland_sys_path $1)
 }
 
+if ! which lava-wait &>/dev/null; then
+        echo "This script must be executed in LAVA"
+        exit
+fi
+
+# Setup DPDK
+sysctl -w vm.nr_hugepages=1024
+sh -c 'echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages' || true
+mkdir ${RUN_DIR}/huge || true
+mount -t hugetlbfs nodev ${RUN_DIR}/huge || true
+
+depmod
+modprobe uio
+insmod ${DPDK_INSTALL_DIR}/kmod/igb_uio.ko || true
+
+# Setup DPDK interface
+dev=$(what_vland_interface ${VLAND_NAME})
+echo "dev = ${dev}"
+
+# DEV_PCI=`${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --status | grep $dev | awk '{print $1}'`
+# echo "DEV_PCI = ${DEV_PCI}"
+
 LOCAL_MAC=$(what_vland_MAC ${VLAND_NAME})
 echo "LOCAL_MAC = ${LOCAL_MAC}"
 
 
+echo ">> SEND client_ready"
+lava-send client_ready
+echo "<< Wait server_ready"
+lava-wait server_ready
+
+ifconfig ${dev} 1.1.1.2 up
+ping -c 30 1.1.1.1
+ifconfig -a
+
 if [ "${PKTIO}" = "dpdk" ]; then
+	depmod
+	lsmod
+	modprobe uio
+	insmod ${DPDK_INSTALL_DIR}/kmod/igb_uio.ko || true
+
+	ifconfig ${dev} down
+	# Setup DPDK interface
+	DEV_PCI=`${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --status | grep $dev | awk '{print $1}'`
+	echo "DEV_PCI = ${DEV_PCI}"
+
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -u ${DEV_PCI}
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --bind=igb_uio ${DEV_PCI}
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py -s
+	${BUILD_DIR}/dpdk/usertools/dpdk-devbind.py --status
 	dev="0"
 elif [ "${PKTIO}" = "socket" ]; then
 	export ODP_PKTIO_DISABLE_DPDK=1
@@ -83,12 +128,17 @@ if [ "${REMOTE_MAC}" = "" ]; then
 	echo "Using fake REMOTE_MAC = ${REMOTE_MAC}"
 fi
 
+echo "Test start..."
 echo taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev --srcmac ${LOCAL_MAC} --dstmac ${REMOTE_MAC} \
                 --srcip ${LOCAL_IP} --dstip ${REMOTE_IP} -m u -i 0 -c ${CORES_MASK} -p 18 \
                 -e ${LOCAL_PORT} -f ${REMOTE_PORT} -n ${PACKET_CNT}
 
+echo "<< Wait server_start_generator"
+lava-send  client_start_generator
+lava-wait  server_start_generator
 
-export GEN_UDP_TX_BURST_SIZE=4096
+GEN_UDP_TX_BURST_SIZE=4096
+
 export ODP_PKTIO_DPDK_PARAMS="-m 1024"
 taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev --srcmac ${LOCAL_MAC} --dstmac ${REMOTE_MAC} \
                 --srcip ${LOCAL_IP} --dstip ${REMOTE_IP} -m u -i 0 -c ${CORES_MASK} -p 18 \
@@ -96,3 +146,12 @@ taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev --srcmac ${LOCAL_MAC} 
 
 MAX_SEND_RATE=`cat /tmp/generator_client.data | grep "max send rate:" | tail -n 1 | awk '{print $12}'`
 echo "MAX_SEND_RATE = ${MAX_SEND_RATE}"
+
+
+echo ">> SEND client_done"
+lava-send client_done
+
+echo "<< Wait server_done"
+lava-wait server_done
+
+echo "A10"
