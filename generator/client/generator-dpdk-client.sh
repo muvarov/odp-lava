@@ -129,15 +129,16 @@ if [ "${REMOTE_MAC}" = "" ]; then
 fi
 
 echo "Test start..."
+GEN_UDP_TX_BURST_SIZE=1024
 echo taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev --srcmac ${LOCAL_MAC} --dstmac ${REMOTE_MAC} \
                 --srcip ${LOCAL_IP} --dstip ${REMOTE_IP} -m u -i 0 -c ${CORES_MASK} -p 18 \
-                -e ${LOCAL_PORT} -f ${REMOTE_PORT} -n ${PACKET_CNT}
+                -e ${LOCAL_PORT} -f ${REMOTE_PORT} -n ${PACKET_CNT} -x ${GEN_UDP_TX_BURST_SIZE}
+
 
 echo "<< Wait server_start_generator"
 lava-send  client_start_generator
 lava-wait  server_start_generator
 
-GEN_UDP_TX_BURST_SIZE=4096
 
 export ODP_PKTIO_DPDK_PARAMS="-m 1024"
 taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev --srcmac ${LOCAL_MAC} --dstmac ${REMOTE_MAC} \
