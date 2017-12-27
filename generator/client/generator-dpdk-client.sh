@@ -148,6 +148,13 @@ taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev --srcmac ${LOCAL_MAC} 
 MAX_SEND_RATE=`cat /tmp/generator_client.data | grep "max send rate:" | tail -n 1 | awk '{print $12}'`
 echo "MAX_SEND_RATE = ${MAX_SEND_RATE}"
 
+git clone https://github.com/muvarov/odp_perf_reports.git
+python odp_perf_reports/odpt_add_result.py generator TX $RESULT_RATE
+GIT_COMMIT=`git log -1 --format="%H"`
+python odp_perf_reports/odpt_post_results.py \
+	http://muvarov.ddns.net:5000/githubemail/testresults.py \
+	${GIT_COMMIT} Maxim
+
 
 echo ">> SEND client_done"
 lava-send client_done

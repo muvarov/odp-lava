@@ -123,8 +123,6 @@ python odp_perf_reports/odpt_post_results.py \
 	http://muvarov.ddns.net:5000/githubemail/testresults.py \
 	${GIT_COMMIT} Maxim
 
-ifconfig -a
-
 lava-test-case RX_rate --result pass --measurement $RESULT_RATE --units $RESULT_UNIT
 
 echo ">> SEND server_done"
