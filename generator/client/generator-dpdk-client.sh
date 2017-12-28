@@ -149,7 +149,7 @@ MAX_SEND_RATE=`cat /tmp/generator_client.data | grep "max send rate:" | tail -n 
 echo "MAX_SEND_RATE = ${MAX_SEND_RATE}"
 
 git clone https://github.com/muvarov/odp_perf_reports.git
-python odp_perf_reports/odpt_add_result.py generator TX $RESULT_RATE
+python odp_perf_reports/odpt_add_result.py generator TX $MAX_SEND_RATE
 GIT_COMMIT=`git log -1 --format="%H"`
 python odp_perf_reports/odpt_post_results.py \
 	http://muvarov.ddns.net:5000/githubemail/testresults.py \
