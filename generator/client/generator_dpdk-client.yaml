@@ -69,6 +69,7 @@ install:
         - rm -rf odp
         - git clone --depth=1 --single-branch ${ODP_REPO} -b ${ODP_BRANCH}
         - cd odp
+        - echo "odp dir `pwd`"
         - git branch
         - git log -1
         - ./bootstrap || true
