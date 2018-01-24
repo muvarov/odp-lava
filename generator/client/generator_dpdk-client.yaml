@@ -95,4 +95,5 @@ run:
         - export CORES_MASK=${CORES_MASK:-"0x8"}
         - export PACKET_CNT=${PACKET_CNT:-600000000}
         - export PKTIO=${PKTIO}
+        - export ODP_BRANCH=${ODP_BRANCH}
         - lava-test-case generator-client --shell generator/client/generator-dpdk-client.sh
