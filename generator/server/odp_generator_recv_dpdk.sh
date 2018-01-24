@@ -117,7 +117,7 @@ RESULT_UNIT=`echo $RESULT | awk '{print $24}'`
 
 
 git clone https://github.com/muvarov/odp_perf_reports.git
-python odp_perf_reports/odpt_add_result.py generator RX $RESULT_RATE
+python odp_perf_reports/odpt_add_result.py generator-${ODP_BRANCH} RX $RESULT_RATE
 pushd /root/odp
 GIT_COMMIT=`git log -1 --format="%H"`
 popd
