@@ -15,7 +15,6 @@ metadata:
 params:
     BUILD_DIR: /root
     DPDK_DIR: dpdk
-    DPDK_TAG: v17.08
     DPDK_REPO: http://dpdk.org/git/dpdk
     DPDK_TARGET: x86_64-native-linuxapp-gcc
     ODP_INSTALL_DIR: /root/install_dir
@@ -93,4 +92,5 @@ run:
         - export CORES_MASK=${CORES_MASK:-0x4}
         - export PKTIO=${PKTIO}
         - export ODP_BRANCH=${ODP_BRANCH}
+        - export DPDK_TAG=${DPDK_TAG}
         - lava-test-case odp_generator_recv-dpdk-server --shell generator/server/odp_generator_recv_dpdk.sh

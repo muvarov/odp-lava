@@ -8,7 +8,6 @@ metadata:
 params:
     BUILD_DIR: /root
     DPDK_DIR: dpdk
-    DPDK_TAG: v17.08
     DPDK_REPO: http://dpdk.org/git/dpdk
     DPDK_TARGET: x86_64-native-linuxapp-gcc
     ODP_INSTALL_DIR: /root/install_dir
@@ -96,4 +95,5 @@ run:
         - export PACKET_CNT=${PACKET_CNT:-600000000}
         - export PKTIO=${PKTIO}
         - export ODP_BRANCH=${ODP_BRANCH}
+        - export DPDK_TAG=${DPDK_TAG}
         - lava-test-case generator-client --shell generator/client/generator-dpdk-client.sh

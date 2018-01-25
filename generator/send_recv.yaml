@@ -93,6 +93,7 @@ actions:
               "VLAND_NAME": "vlan_one"
               "CORES_MASK": "0x4"
               "PKTIO" : "dpdk"
+              "DPDK_TAG" : "v17.08"
 
 - test:
     role:
@@ -116,3 +117,4 @@ actions:
               "CORES_MASK": "0x4"
               "PACKET_CNT": 8000000000
               "PKTIO" : "dpdk"
+              "DPDK_TAG" : "v17.08"
