@@ -73,7 +73,7 @@ install:
         - git log -1
         - ./bootstrap || true
         - autoreconf -i
-        - if [ ${ODP_BRANCH} = "caterpillar" ]; then PLAT="--with-platform=dpdk"; fi
+        - if [ ${ODP_BRANCH} = "caterpillar" ]; then PLAT="--with-platform=linux-dpdk"; fi
         - ./configure --prefix=$ODP_INSTALL_DIR --with-dpdk-path=$BUILD_DIR/$DPDK_DIR/$DPDK_TARGET --enable-dpdk-zero-copy ${PLAT}
         - make clean
         - make -j $(nproc)
