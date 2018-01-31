@@ -134,6 +134,7 @@ echo taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev --srcmac ${LOCAL_
                 --srcip ${LOCAL_IP} --dstip ${REMOTE_IP} -m u -i 0 -c ${CORES_MASK} -p 18 \
                 -e ${LOCAL_PORT} -f ${REMOTE_PORT} -n ${PACKET_CNT} -x ${GEN_UDP_TX_BURST_SIZE}
 
+dmesg -c > /dev/null
 
 echo "<< Wait server_start_generator"
 lava-send  client_start_generator
@@ -143,10 +144,13 @@ lava-wait  server_start_generator
 export ODP_PKTIO_DPDK_PARAMS="-m 1024"
 taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev --srcmac ${LOCAL_MAC} --dstmac ${REMOTE_MAC} \
                 --srcip ${LOCAL_IP} --dstip ${REMOTE_IP} -m u -i 0 -c ${CORES_MASK} -p 18 \
-                -e ${LOCAL_PORT} -f ${REMOTE_PORT} -n ${PACKET_CNT} -x ${GEN_UDP_TX_BURST_SIZE}|tee  /tmp/generator_client.data
+                -e ${LOCAL_PORT} -f ${REMOTE_PORT} -n ${PACKET_CNT} -x ${GEN_UDP_TX_BURST_SIZE} 2>&1 |tee  /tmp/generator_client.data
 
 MAX_SEND_RATE=`cat /tmp/generator_client.data | grep "max send rate:" | tail -n 1 | awk '{print $12}'`
 echo "MAX_SEND_RATE = ${MAX_SEND_RATE}"
+
+cat /tmp/generator_client.data
+dmesg
 
 git clone https://github.com/muvarov/odp_perf_reports.git
 python odp_perf_reports/odpt_add_result.py generator-${ODP_BRANCH} TX $MAX_SEND_RATE

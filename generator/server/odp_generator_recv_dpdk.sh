@@ -98,11 +98,12 @@ cd ${RUN_DIR}
 echo ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev -m r -c ${CORES_MASK}
 echo ">> SEND server_start_generator"
 
+dmesg -c > /dev/null
+
 lava-wait  client_start_generator
 lava-send  server_start_generator
 
-taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev -m r -c ${CORES_MASK}|tee /tmp/app.data &
-#taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_l2fwd -i $dev |tee /tmp/app.data &
+taskset 0xfe ${ODP_INSTALL_DIR}/bin/odp_generator -I $dev -m r -c ${CORES_MASK} 2>&1 |tee /tmp/app.data &
 echo $! > /tmp/app.pid
 
 echo "<< WAIT client_done"
@@ -114,6 +115,9 @@ kill -9 `cat /tmp/app.pid`
 RESULT=`cat /tmp/app.data | tail -n 1  | grep "sent:"`
 RESULT_RATE=`echo $RESULT | awk '{print $23}'`
 RESULT_UNIT=`echo $RESULT | awk '{print $24}'`
+
+cat /tmp/app.data
+dmesg
 
 
 git clone https://github.com/muvarov/odp_perf_reports.git
