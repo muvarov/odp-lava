@@ -75,9 +75,8 @@ install:
         - git log -1
         - ./bootstrap || true
         - autoreconf -i
-        - if [ ${ODP_BRANCH} = "caterpillar" ]; then CFG="--with-platform=linux-dpdk --with-sdk-install-path=$BUILD_DIR/$DPDK_DIR/$DPDK_TARGET"; fi
-        - if [ ${ODP_BRANCH} = "master" ]; then CFG="--with-dpdk-path=$BUILD_DIR/$DPDK_DIR/$DPDK_TARGET --enable-dpdk-zero-copy"; fi
-        - ./configure --prefix=$ODP_INSTALL_DIR ${CFG}
+        - if [ ${ODP_BRANCH} = "caterpillar" ]; then PLAT="--with-platform=linux-dpdk"; fi
+        - ./configure --prefix=$ODP_INSTALL_DIR --with-dpdk-path=$BUILD_DIR/$DPDK_DIR/$DPDK_TARGET --enable-dpdk-zero-copy ${PLAT}
         - make clean
         - make -j $(nproc)
         - make install
